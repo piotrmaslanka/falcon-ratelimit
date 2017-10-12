@@ -24,7 +24,7 @@ class _RateLimitDB(object):
         _RateLimitDB._RATE_LIMIT_DB[user][resource_name] = p
 
     @staticmethod
-    def add_call(user, resource_name)
+    def add_call(user, resource_name):
         _RateLimitDB._RATE_LIMIT_DB[user][resource_name].append(
             time.time()
         )
