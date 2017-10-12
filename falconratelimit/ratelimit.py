@@ -17,21 +17,21 @@ class _RateLimitDB(object):
 
     @staticmethod
     def filter(user, resource_name, window_size):
-        p = _RateLimitDB[user][resource_name]
+        p = _RateLimitDB._RATE_LIMIT_DB[user][resource_name]
         t = time.time()
         exp_int = t - window_size
-        p = [s for s in p if s < exp_int]
-        _RateLimitDB[user][resource_name] = p
+        p = [s for s in p if s >= exp_int]
+        _RateLimitDB._RATE_LIMIT_DB[user][resource_name] = p
 
     @staticmethod
     def check_for(user, resource_name, window_size):
         _RateLimitDB.filter(user, resource_name, window_size)
         _RateLimitDB._RATE_LIMIT_DB[user][resource_name].append(time.time())
-        return len(p) / window_size
+        return len(_RateLimitDB._RATE_LIMIT_DB[user][resource_name]) / window_size
 
 
 def rate_limit(per_second=30, resource=u'', window_size=10):
-    def hook(self, req, resp):
+    def hook(req, resp, resource, params):
         if _RateLimitDB.check_for(req.forwarded_host, resource, window_size) > per_second:
             raise falcon.HTTPTooManyRequests('Rate limited')
     return hook
