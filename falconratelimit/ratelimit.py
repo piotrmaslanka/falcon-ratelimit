@@ -16,17 +16,17 @@ class _RateLimitDB(object):
     )
 
     @staticmethod
-    def filter():
-
-    @staticmethod
-    def check_for(user, resource_name, window_size):
+    def filter(user, resource_name, window_size):
         p = _RateLimitDB[user][resource_name]
         t = time.time()
         exp_int = t - window_size
         p = [s for s in p if s < exp_int]
-        p.append(t)
         _RateLimitDB[user][resource_name] = p
 
+    @staticmethod
+    def check_for(user, resource_name, window_size):
+        _RateLimitDB.filter(user, resource_name, window_size)
+        _RateLimitDB._RATE_LIMIT_DB[user][resource_name].append(time.time())
         return len(p) / window_size
 
 
