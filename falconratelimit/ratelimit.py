@@ -37,10 +37,11 @@ class _RateLimitDB(object):
         return p / window_size
 
 
-def rate_limit(per_second=30, resource=u'', window_size=10):
+def rate_limit(per_second=30, resource=u'', window_size=10, error_message="429 Too Many Requests"):
     def hook(req, resp, resource, params):
         if _RateLimitDB.check_for(req.forwarded_host,
                                   resource,
                                   window_size) > per_second:
-            raise falcon.HTTPTooManyRequests('Rate limited')
+            resp.status = falcon.HTTP_429
+            raise falcon.HTTPTooManyRequests(error_message)
     return hook
