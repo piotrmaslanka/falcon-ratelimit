@@ -1,14 +1,8 @@
 # coding=UTF-8
 from __future__ import print_function, absolute_import, division
-import six
-import logging
-import functools
-import collections
-import time
-import falcon
+import six, logging, functools, collections, time, falcon, redis
 
 logger = logging.getLogger(__name__)
-
 
 class _RateLimitDB(object):
     _RATE_LIMIT_DB = collections.defaultdict(
@@ -37,7 +31,7 @@ class _RateLimitDB(object):
         return p / window_size
 
 
-def rate_limit(per_second=30, resource=u'', window_size=10, error_message="429 Too Many Requests"):
+def rate_limit(per_second=30, resource=u'', window_size=10, error_message="429 Too Many Requests", broker=None):
     def hook(req, resp, resource, params):
         if _RateLimitDB.check_for(req.forwarded_host,
                                   resource,
@@ -45,3 +39,7 @@ def rate_limit(per_second=30, resource=u'', window_size=10, error_message="429 T
             resp.status = falcon.HTTP_429
             raise falcon.HTTPTooManyRequests(error_message)
     return hook
+
+def get_rate_limit_hook(redis_url=None, *args, **kwargs):
+    r = redis.StrictRedis.from_url(redis_url) if redis_url else None
+    return rate_limit(broker=r, *args, **kwargs)
