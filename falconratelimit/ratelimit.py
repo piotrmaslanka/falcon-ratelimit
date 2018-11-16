@@ -84,5 +84,5 @@ def rate_limit(per_second=30, resource=u'default', window_size=10, error_message
     return hook
 
 def get_rate_limit_hook(redis_url=None, *args, **kwargs):
-    r = redis.StrictRedis.from_url(redis_url) if redis_url else 'localhost:6369'
+    r = redis.StrictRedis.from_url(redis_url) if redis_url else None
     return rate_limit(broker=r, *args, **kwargs)
