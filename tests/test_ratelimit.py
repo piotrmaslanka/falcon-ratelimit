@@ -15,7 +15,7 @@ class Resource(object):
     def on_post(self, req, resp):
         resp.status = falcon.HTTP_200
 
-    @falcon.before(get_rate_limit_hook('http://example.com', per_second=3, window_size=5))
+    @falcon.before(get_rate_limit_hook('localhost:6379', per_second=3, window_size=5, resource='on_get'))
     def on_get(self, req, resp):
         resp.status = falcon.HTTP_200
 
@@ -24,7 +24,6 @@ app.add_route('/', Resource())
 
 
 class TestRatelimit(testing.TestCase):
-
     def setUp(self):
         super(TestRatelimit, self).setUp()
         self.app = app
