@@ -3,7 +3,6 @@ from __future__ import print_function, absolute_import, division
 
 import datetime
 import falcon
-import logging
 import six
 import time
 import unittest
@@ -12,7 +11,6 @@ from freezegun import freeze_time
 
 from falconratelimit import rate_limit
 
-logger = logging.getLogger(__name__)
 
 
 class NoRedisResource(object):
