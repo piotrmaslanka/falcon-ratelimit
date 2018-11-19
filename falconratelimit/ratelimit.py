@@ -73,7 +73,7 @@ class _RateLimitDB(object):
         _RateLimitDB.filter(user, argument.resource, argument.window_size)
         _RateLimitDB.add_call(user, argument.resource)
         p = len(_RateLimitDB._RATE_LIMIT_DB[user][argument.resource])
-        return (p / window_size) > argument.per_second
+        return (p / argument.window_size) > argument.per_second
 
 
 def _rate_db(req, resp, argument):

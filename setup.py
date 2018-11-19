@@ -6,7 +6,7 @@ with open('README.md', 'r') as fin:
         x for x in fin.readlines() if not x.startswith('[!'))
 
 setup(name='falcon-ratelimit',
-      version='1.2a1',
+      version='1.2a2',
       packages=find_packages(include=['falconratelimit', 'falconratelimit.*']),
       install_requires=["falcon", "six"],
       tests_require=[
