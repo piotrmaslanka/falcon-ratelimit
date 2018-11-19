@@ -28,6 +28,10 @@ class AbstractRateLimitDB(object):
         raise NotImplementedError  # pragma: no cover
 
 
+Argument = collections.namedtuple('Argument', ('resource', 'window_size',
+                                               'per_second', 'error_message',
+                                               'redis_url'))
+
 try:
     redis
 except NameError:
@@ -49,11 +53,12 @@ else:
             broker.sadd(user + resource_name, time.time())
 
         @staticmethod
-        def check_for(user, resource_name, window_size, broker):
-            _RateLimitDBRedis.filter(user, resource_name, window_size, broker)
-            _RateLimitDBRedis.add_call(user, resource_name, broker)
-            times_called = len(broker.smembers(user + resource_name))
-            return times_called / window_size
+        def check_for(user, argument, broker):
+            _RateLimitDBRedis.filter(user, argument.resource,
+                                     argument.window_size, broker)
+            _RateLimitDBRedis.add_call(user, argument.resource, broker)
+            times_called = len(broker.smembers(user + argument.resource))
+            return (times_called / argument.window_size) > argument.per_second
 
 
 class _RateLimitDB(AbstractRateLimitDB):
@@ -76,30 +81,25 @@ class _RateLimitDB(AbstractRateLimitDB):
         )
 
     @staticmethod
-    def check_for(user, resource_name, window_size):
-        _RateLimitDB.filter(user, resource_name, window_size)
-        _RateLimitDB.add_call(user, resource_name)
-        p = len(_RateLimitDB._RATE_LIMIT_DB[user][resource_name])
-        return p / window_size
+    def check_for(user, argument):
+        _RateLimitDB.filter(user, argument.resource_name, argument.window_size)
+        _RateLimitDB.add_call(user, argument.resource)
+        p = len(_RateLimitDB._RATE_LIMIT_DB[user][argument.resource])
+        return (p / window_size) > argument.per_second
 
 
-def _rate_db(req, resp, resource, window_size, per_second, error_message):
+def _rate_db(req, resp, argument):
     if _RateLimitDB.check_for(req.forwarded_host,
-                              resource,
-                              window_size) > per_second:
+                              argument):
         resp.status = falcon.HTTP_429
-        raise falcon.HTTPTooManyRequests(error_message)
+        raise falcon.HTTPTooManyRequests(argument.error_message)
 
 
-def _rate_redis(req, resp, resource, window_size, redis_url, per_second,
-                error_message):
-    broker = redis.StrictRedis.from_url(redis_url)
-    if _RateLimitDBRedis.check_for(req.forwarded_host,
-                                   resource,
-                                   window_size,
-                                   broker) > per_second:
+def _rate_redis(req, resp, argument):
+    broker = redis.StrictRedis.from_url(argument.redis_url)
+    if _RateLimitDBRedis.check_for(req.forwarded_host, argument, broker):
         resp.status = falcon.HTTP_429
-        raise falcon.HTTPTooManyRequests(error_message)
+        raise falcon.HTTPTooManyRequests(argument.error_message)
 
 
 def rate_limit(per_second=30, resource=u'default', window_size=10,
@@ -113,10 +113,11 @@ def rate_limit(per_second=30, resource=u'default', window_size=10,
                 raise ValueError(
                     'Cannot use redis - no redis module installed!')
             else:
-                _rate_redis(req, resp, resource, window_size, redis_url,
-                            per_second, error_message)
+                _rate_redis(req, resp, Argument(resource, window_size,
+                                                per_second, error_message,
+                                                redis_url))
         else:
-            _rate_db(req, resp, resource, window_size, per_second,
-                     error_message)
+            _rate_db(req, resp, Argument(resource, window_size, per_second,
+                                         error_message, None))
 
     return hook
