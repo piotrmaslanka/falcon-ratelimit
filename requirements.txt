@@ -1,2 +1,4 @@
-six
 falcon
+freezegun
+redis
+six
