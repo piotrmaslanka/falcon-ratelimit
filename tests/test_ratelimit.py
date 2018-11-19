@@ -63,7 +63,7 @@ class TestRatelimit(testing.TestCase):
             resp = self.simulate_post('/noredis')
             self.assertEqual(resp.status, falcon.HTTP_200)
 
-    @unittest.skipUnless('redis' in locals(), 'redis package not installed')
+    @unittest.skipIf('redis' not in locals(), 'redis package not installed')
     def test_get_rate_limit(self):
         with freeze_time("2018-01-01 00:00:00") as frozen_datetime:
             resp = self.simulate_get('/redis')
