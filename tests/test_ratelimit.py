@@ -1,9 +1,15 @@
 # coding=UTF-8
 from __future__ import print_function, absolute_import, division
-import datetime, falcon, logging, time, six
+
+import datetime
+import falcon
+import logging
+import six
+import time
 from falcon import testing
-from falconratelimit import rate_limit
 from freezegun import freeze_time
+
+from falconratelimit import rate_limit
 
 logger = logging.getLogger(__name__)
 
@@ -13,10 +19,12 @@ class NoRedisResource(object):
     def on_post(self, req, resp):
         resp.status = falcon.HTTP_200
 
+
 class RedisResource(object):
     @falcon.before(rate_limit(redis_url='localhost:6379', per_second=1, window_size=5, resource='on_get'))
     def on_get(self, req, resp):
         resp.status = falcon.HTTP_200
+
 
 app = falcon.API()
 app.add_route('/noredis', NoRedisResource())

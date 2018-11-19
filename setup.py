@@ -5,7 +5,7 @@ with open('README.md', 'r') as fin:
       long_description = fin.read()
 
 setup(name='falcon-ratelimit',
-      version='1.0',
+      version='1.1a1',
       packages=find_packages(include=['falconratelimit', 'falconratelimit.*']),
       install_requires=["falcon", "six"],
       tests_require=[
