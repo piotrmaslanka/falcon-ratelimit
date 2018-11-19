@@ -83,6 +83,25 @@ class _RateLimitDB(AbstractRateLimitDB):
         return p / window_size
 
 
+def _rate_db(req, resp, resource, window_size, per_second, error_message):
+    if _RateLimitDB.check_for(req.forwarded_host,
+                              resource,
+                              window_size) > per_second:
+        resp.status = falcon.HTTP_429
+        raise falcon.HTTPTooManyRequests(error_message)
+
+
+def _rate_redis(req, resp, resource, window_size, redis_url, per_second,
+                error_message):
+    broker = redis.StrictRedis.from_url(redis_url)
+    if _RateLimitDBRedis.check_for(req.forwarded_host,
+                                   resource,
+                                   window_size,
+                                   broker) > per_second:
+        resp.status = falcon.HTTP_429
+        raise falcon.HTTPTooManyRequests(error_message)
+
+
 def rate_limit(per_second=30, resource=u'default', window_size=10,
                error_message="429 Too Many Requests",
                redis_url=None):
@@ -94,18 +113,10 @@ def rate_limit(per_second=30, resource=u'default', window_size=10,
                 raise ValueError(
                     'Cannot use redis - no redis module installed!')
             else:
-                broker = redis.StrictRedis.from_url(redis_url)
-                if _RateLimitDBRedis.check_for(req.forwarded_host,
-                                               resource,
-                                               window_size,
-                                               broker) > per_second:
-                    resp.status = falcon.HTTP_429
-                    raise falcon.HTTPTooManyRequests(error_message)
+                _rate_redis(req, resp, resource, window_size, redis_url,
+                            per_second, error_message)
         else:
-            if _RateLimitDB.check_for(req.forwarded_host,
-                                      resource,
-                                      window_size) > per_second:
-                resp.status = falcon.HTTP_429
-                raise falcon.HTTPTooManyRequests(error_message)
+            _rate_db(req, resp, resource, window_size, per_second,
+                     error_message)
 
     return hook

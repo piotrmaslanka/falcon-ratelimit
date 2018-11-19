@@ -10,6 +10,7 @@ falcon-ratelimit
 [![PyPI](https://img.shields.io/pypi/implementation/falcon-ratelimit.svg)](https://pypi.python.org/pypi/falcon-ratelimit)
 
 Rate limiter for Falcon. Install with:
+
 ```bash
 pip install falcon-ratelimit
 ```
