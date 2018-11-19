@@ -14,13 +14,13 @@ logger = logging.getLogger(__name__)
 
 class AbstractRateLimitDB(object):
     def filter():
-        raise NotImplementedError
+        raise NotImplementedError   # pragma: no cover
 
     def add_call():
-        raise NotImplementedError
+        raise NotImplementedError   # pragma: no cover
 
     def check_for():
-        raise NotImplementedError
+        raise NotImplementedError   # pragma: no cover
 
 
 class _RateLimitDBRedis(AbstractRateLimitDB):
