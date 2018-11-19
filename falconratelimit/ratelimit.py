@@ -3,14 +3,12 @@ from __future__ import print_function, absolute_import, division
 
 import collections
 import falcon
-import functools
 import warnings
 
 try:
     import redis
 except ImportError:
     warnings.warn('redis module not installed')
-import six
 import time
 
 Argument = collections.namedtuple('Argument', ('resource', 'window_size',
