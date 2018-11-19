@@ -92,6 +92,8 @@ def _rate_redis(req, resp, argument):
 def rate_limit(per_second=30, resource=u'default', window_size=10,
                error_message="429 Too Many Requests",
                redis_url=None):
+    arg = Argument(resource, window_size, per_second, error_message, redis_url)
+
     def hook(req, resp, params):
         if redis_url:
             try:
@@ -100,11 +102,8 @@ def rate_limit(per_second=30, resource=u'default', window_size=10,
                 raise ValueError(
                     'Cannot use redis - no redis module installed!')
             else:
-                _rate_redis(req, resp, Argument(resource, window_size,
-                                                per_second, error_message,
-                                                redis_url))
+                _rate_redis(req, resp, arg)
         else:
-            _rate_db(req, resp, Argument(resource, window_size, per_second,
-                                         error_message, None))
+            _rate_db(req, resp, arg)
 
     return hook
