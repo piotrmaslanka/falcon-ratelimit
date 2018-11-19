@@ -6,6 +6,7 @@ import falcon
 import functools
 import logging
 import warnings
+
 try:
     import redis
 except ImportError:
@@ -18,13 +19,14 @@ logger = logging.getLogger(__name__)
 
 class AbstractRateLimitDB(object):
     def filter():
-        raise NotImplementedError   # pragma: no cover
+        raise NotImplementedError  # pragma: no cover
 
     def add_call():
-        raise NotImplementedError   # pragma: no cover
+        raise NotImplementedError  # pragma: no cover
 
     def check_for():
-        raise NotImplementedError   # pragma: no cover
+        raise NotImplementedError  # pragma: no cover
+
 
 try:
     redis
@@ -81,19 +83,22 @@ class _RateLimitDB(AbstractRateLimitDB):
         return p / window_size
 
 
-def rate_limit(per_second=30, resource=u'default', window_size=10, error_message="429 Too Many Requests",
+def rate_limit(per_second=30, resource=u'default', window_size=10,
+               error_message="429 Too Many Requests",
                redis_url=None):
     def hook(req, resp, params):
         if redis_url:
             try:
                 redis
             except NameError:
-                raise ValueError('Cannot use redis - no redis module installed!')
+                raise ValueError(
+                    'Cannot use redis - no redis module installed!')
             else:
                 broker = redis.StrictRedis.from_url(redis_url)
                 if _RateLimitDBRedis.check_for(req.forwarded_host,
                                                resource,
-                                               window_size, broker) > per_second:
+                                               window_size,
+                                               broker) > per_second:
                     resp.status = falcon.HTTP_429
                     raise falcon.HTTPTooManyRequests(error_message)
         else:

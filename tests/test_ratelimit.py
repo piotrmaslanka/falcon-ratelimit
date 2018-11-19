@@ -3,10 +3,10 @@ from __future__ import print_function, absolute_import, division
 
 import datetime
 import falcon
-import unittest
 import logging
 import six
 import time
+import unittest
 from falcon import testing
 from freezegun import freeze_time
 
@@ -20,9 +20,14 @@ class NoRedisResource(object):
     def on_post(self, req, resp):
         resp.status = falcon.HTTP_200
 
+
 import redis
+
+
 class RedisResource(object):
-    @falcon.before(rate_limit(redis_url='localhost:6379', per_second=1, window_size=5, resource='on_get'))
+    @falcon.before(
+        rate_limit(redis_url='localhost:6379', per_second=1, window_size=5,
+                   resource='on_get'))
     def on_get(self, req, resp):
         resp.status = falcon.HTTP_200
 

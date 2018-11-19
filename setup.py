@@ -2,7 +2,8 @@
 from setuptools import setup, find_packages
 
 with open('README.md', 'r') as fin:
-    long_description = '\n'.join(x for x in fin.readlines() if not x.startswith('[!'))
+    long_description = '\n'.join(
+        x for x in fin.readlines() if not x.startswith('[!'))
 
 setup(name='falcon-ratelimit',
       version='1.1',
@@ -15,4 +16,3 @@ setup(name='falcon-ratelimit',
       long_description=long_description,
       description='A rate limiter plugin for Falcon'
       )
-
