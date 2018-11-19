@@ -1,10 +1,17 @@
 # coding=UTF-8
 from setuptools import setup, find_packages
 
-setup(packages=find_packages(include=['falconratelimit', 'falconratelimit.*']),
+with open('README.md', 'r') as fin:
+      long_description = fin.read()
+
+setup(name='falcon-ratelimit',
+      version='1.0',
+      packages=find_packages(include=['falconratelimit', 'falconratelimit.*']),
       install_requires=["falcon", "six"],
       tests_require=[
           "nose", "mock", "coverage"
       ],
-      test_suite='nose.collector'
+      test_suite='nose.collector',
+      long_description=long_description,
+      description='A rate limiter plugin for Falcon'
       )
