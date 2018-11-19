@@ -8,9 +8,8 @@ language: python
 install:
 - pip install -r requirements.txt
 - pip install --force-reinstall "coverage>=4.0,<4.4" codeclimate-test-reporter
-before_script:
-- sudo redis-server /etc/redis/redis.conf --port 6379
 script:
+- sudo redis-server /etc/redis/redis.conf --port 6379
 - python setup.py nosetests
 after_success:
 - codeclimate-test-reporter
