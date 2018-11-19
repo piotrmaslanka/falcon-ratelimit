@@ -17,7 +17,7 @@ from falconratelimit import rate_limit
 
 
 class NoRedisResource(object):
-    @falcon.before(rate_limit(per_second=5, window_size=30 resource='resource_name'))
+    @falcon.before(rate_limit(per_second=5, window_size=30, resource='resource_name'))
     def on_post(self, req, resp):
         ...
 
