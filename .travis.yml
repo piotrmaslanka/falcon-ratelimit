@@ -1,15 +1,15 @@
 language: python
- python:
-  - "2.7"
-  - "3.5"
-  - "3.4"
-  - "pypy"
- cache: pip
+python:
+ - "2.7"
+ - "3.5"
+ - "3.4"
+ - "pypy"
+cache: pip
 install:
-- pip install -r requirements.txt
-- pip install --force-reinstall "coverage>=4.0,<4.4" codeclimate-test-reporter
+ - pip install -r requirements.txt
+ - pip install --force-reinstall "coverage>=4.0,<4.4" codeclimate-test-reporter
 script:
-- sudo redis-server /etc/redis/redis.conf --port 6379
-- python setup.py nosetests
+ - sudo redis-server /etc/redis/redis.conf --port 6379
+ - python setup.py nosetests
 after_success:
-- codeclimate-test-reporter
+ - codeclimate-test-reporter
