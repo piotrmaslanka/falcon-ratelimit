@@ -82,15 +82,14 @@ class _RateLimitDB(AbstractRateLimitDB):
 
     @staticmethod
     def check_for(user, argument):
-        _RateLimitDB.filter(user, argument.resource_name, argument.window_size)
+        _RateLimitDB.filter(user, argument.resource, argument.window_size)
         _RateLimitDB.add_call(user, argument.resource)
         p = len(_RateLimitDB._RATE_LIMIT_DB[user][argument.resource])
         return (p / window_size) > argument.per_second
 
 
 def _rate_db(req, resp, argument):
-    if _RateLimitDB.check_for(req.forwarded_host,
-                              argument):
+    if _RateLimitDB.check_for(req.forwarded_host, argument):
         resp.status = falcon.HTTP_429
         raise falcon.HTTPTooManyRequests(argument.error_message)
 
