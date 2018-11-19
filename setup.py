@@ -2,10 +2,10 @@
 from setuptools import setup, find_packages
 
 with open('README.md', 'r') as fin:
-    long_description = fin.read()
+    long_description = '\n'.join(x for x in fin.readlines() if not x.startswith('[!'))
 
 setup(name='falcon-ratelimit',
-      version='1.1a2',
+      version='1.1',
       packages=find_packages(include=['falconratelimit', 'falconratelimit.*']),
       install_requires=["falcon", "six"],
       tests_require=[

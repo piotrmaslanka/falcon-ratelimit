@@ -9,7 +9,12 @@ falcon-ratelimit
 [![PyPI version](https://badge.fury.io/py/falcon-ratelimit.svg)](https://badge.fury.io/py/falcon-ratelimit)
 [![PyPI](https://img.shields.io/pypi/implementation/falcon-ratelimit.svg)](https://pypi.python.org/pypi/falcon-ratelimit)
 
-Rate limiter for Falcon. Use like:
+Rate limiter for Falcon. Install with:
+```bash
+pip install falcon-ratelimit
+```
+
+Use like:
 
 ```python
 import falcon
@@ -37,3 +42,6 @@ Using Redis allows for the rate limiting to be implemented across multiple insta
 the `RedisResource` class example the user is allowed to make 1 request per second over 10 seconds meaning that there
 is a limit of 10 requests over 10 seconds. Since this example didn't pass in a `resource` it uses `default` as the name
 for request storage.
+
+If you do not have the `redis` package installed, Redis-related functionality will not work.
+

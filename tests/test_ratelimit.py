@@ -3,6 +3,7 @@ from __future__ import print_function, absolute_import, division
 
 import datetime
 import falcon
+import unittest
 import logging
 import six
 import time
@@ -19,16 +20,25 @@ class NoRedisResource(object):
     def on_post(self, req, resp):
         resp.status = falcon.HTTP_200
 
-
-class RedisResource(object):
-    @falcon.before(rate_limit(redis_url='localhost:6379', per_second=1, window_size=5, resource='on_get'))
-    def on_get(self, req, resp):
-        resp.status = falcon.HTTP_200
+try:
+    import redis
+except ImportError:
+    pass
+else:
+    class RedisResource(object):
+        @falcon.before(rate_limit(redis_url='localhost:6379', per_second=1, window_size=5, resource='on_get'))
+        def on_get(self, req, resp):
+            resp.status = falcon.HTTP_200
 
 
 app = falcon.API()
 app.add_route('/noredis', NoRedisResource())
-app.add_route('/redis', RedisResource())
+try:
+    redis
+except NameError:
+    pass
+else:
+    app.add_route('/redis', RedisResource())
 
 
 class TestRatelimit(testing.TestCase):
@@ -53,6 +63,7 @@ class TestRatelimit(testing.TestCase):
             resp = self.simulate_post('/noredis')
             self.assertEqual(resp.status, falcon.HTTP_200)
 
+    @unittest.skipUnless('redis' in locals(), 'redis package not installed')
     def test_get_rate_limit(self):
         with freeze_time("2018-01-01 00:00:00") as frozen_datetime:
             resp = self.simulate_get('/redis')

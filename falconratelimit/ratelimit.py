@@ -5,7 +5,10 @@ import collections
 import falcon
 import functools
 import logging
-import redis
+try:
+    import redis
+except ImportError:
+    pass
 import six
 import time
 
@@ -22,28 +25,32 @@ class AbstractRateLimitDB(object):
     def check_for():
         raise NotImplementedError   # pragma: no cover
 
+try:
+    redis
+except NameError:
+    pass
+else:
+    class _RateLimitDBRedis(AbstractRateLimitDB):
+        @staticmethod
+        def filter(user, resource_name, window_size, broker):
+            key_name = str(user + resource_name)
+            p = broker.smembers(key_name)
+            t = time.time()
+            exp_time = t - window_size
+            expired_values = [s for s in p if float(s) < exp_time]
+            for value in expired_values:
+                broker.srem(key_name, value)
 
-class _RateLimitDBRedis(AbstractRateLimitDB):
-    @staticmethod
-    def filter(user, resource_name, window_size, broker):
-        key_name = str(user + resource_name)
-        p = broker.smembers(key_name)
-        t = time.time()
-        exp_time = t - window_size
-        expired_values = [s for s in p if float(s) < exp_time]
-        for value in expired_values:
-            broker.srem(key_name, value)
+        @staticmethod
+        def add_call(user, resource_name, broker):
+            broker.sadd(user + resource_name, time.time())
 
-    @staticmethod
-    def add_call(user, resource_name, broker):
-        broker.sadd(user + resource_name, time.time())
-
-    @staticmethod
-    def check_for(user, resource_name, window_size, broker):
-        _RateLimitDBRedis.filter(user, resource_name, window_size, broker)
-        _RateLimitDBRedis.add_call(user, resource_name, broker)
-        times_called = len(broker.smembers(user + resource_name))
-        return times_called / window_size
+        @staticmethod
+        def check_for(user, resource_name, window_size, broker):
+            _RateLimitDBRedis.filter(user, resource_name, window_size, broker)
+            _RateLimitDBRedis.add_call(user, resource_name, broker)
+            times_called = len(broker.smembers(user + resource_name))
+            return times_called / window_size
 
 
 class _RateLimitDB(AbstractRateLimitDB):
@@ -77,12 +84,17 @@ def rate_limit(per_second=30, resource=u'default', window_size=10, error_message
                redis_url=None):
     def hook(req, resp, params):
         if redis_url:
-            broker = redis.StrictRedis.from_url(redis_url)
-            if _RateLimitDBRedis.check_for(req.forwarded_host,
-                                           resource,
-                                           window_size, broker) > per_second:
-                resp.status = falcon.HTTP_429
-                raise falcon.HTTPTooManyRequests(error_message)
+            try:
+                redis
+            except NameError:
+                raise ValueError('Cannot use redis - no redis module installed!')
+            else:
+                broker = redis.StrictRedis.from_url(redis_url)
+                if _RateLimitDBRedis.check_for(req.forwarded_host,
+                                               resource,
+                                               window_size, broker) > per_second:
+                    resp.status = falcon.HTTP_429
+                    raise falcon.HTTPTooManyRequests(error_message)
         else:
             if _RateLimitDB.check_for(req.forwarded_host,
                                       resource,
