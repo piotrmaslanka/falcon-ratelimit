@@ -10,6 +10,6 @@ install:
  - pip install --force-reinstall "coverage>=4.0,<4.4" codeclimate-test-reporter
 script:
  - sudo redis-server /etc/redis/redis.conf --port 6379
- - python setup.py nosetests
+ - python setup.py nosetests --with-coverage
 after_success:
  - codeclimate-test-reporter
