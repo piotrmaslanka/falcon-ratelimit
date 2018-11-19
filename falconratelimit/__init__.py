@@ -6,5 +6,6 @@ from .ratelimit import rate_limit
 __version__ = '1.2a3'
 
 __all__ = [
-    'rate_limit'
+    'rate_limit',
+    '__version__'
 ]

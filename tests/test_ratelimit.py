@@ -12,7 +12,6 @@ from freezegun import freeze_time
 from falconratelimit import rate_limit
 
 
-
 class NoRedisResource(object):
     @falcon.before(rate_limit(per_second=1, window_size=5))
     def on_post(self, req, resp):
