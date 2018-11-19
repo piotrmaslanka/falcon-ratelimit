@@ -5,10 +5,11 @@ import collections
 import falcon
 import functools
 import logging
+import warnings
 try:
     import redis
 except ImportError:
-    pass
+    warnings.warn('redis module not installed')
 import six
 import time
 
