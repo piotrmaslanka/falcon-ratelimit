@@ -16,18 +16,6 @@ import time
 
 logger = logging.getLogger(__name__)
 
-
-class AbstractRateLimitDB(object):
-    def filter():
-        raise NotImplementedError  # pragma: no cover
-
-    def add_call():
-        raise NotImplementedError  # pragma: no cover
-
-    def check_for():
-        raise NotImplementedError  # pragma: no cover
-
-
 Argument = collections.namedtuple('Argument', ('resource', 'window_size',
                                                'per_second', 'error_message',
                                                'redis_url'))
@@ -37,7 +25,7 @@ try:
 except NameError:
     pass
 else:
-    class _RateLimitDBRedis(AbstractRateLimitDB):
+    class _RateLimitDBRedis(object):
         @staticmethod
         def filter(user, resource_name, window_size, broker):
             key_name = str(user + resource_name)
@@ -61,7 +49,7 @@ else:
             return (times_called / argument.window_size) > argument.per_second
 
 
-class _RateLimitDB(AbstractRateLimitDB):
+class _RateLimitDB(object):
     _RATE_LIMIT_DB = collections.defaultdict(
         lambda: collections.defaultdict(list)
     )
