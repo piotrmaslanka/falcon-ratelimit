@@ -67,9 +67,10 @@ class _RateLimitDB(AbstractRateLimitDB):
         return p / window_size
 
 
-def rate_limit(per_second=30, resource=u'default', window_size=10, error_message="429 Too Many Requests", broker=None):
+def rate_limit(per_second=30, resource=u'default', window_size=10, error_message="429 Too Many Requests", redis_url=None):
     def hook(req, resp, params):
-        if broker:
+        if redis_url:
+            broker = redis.StrictRedis.from_url(redis_url)
             if _RateLimitDBRedis.check_for(req.forwarded_host,
                                     resource,
                                     window_size, broker) > per_second:
@@ -82,7 +83,3 @@ def rate_limit(per_second=30, resource=u'default', window_size=10, error_message
                 resp.status = falcon.HTTP_429
                 raise falcon.HTTPTooManyRequests(error_message)
     return hook
-
-def get_rate_limit_hook(redis_url=None, *args, **kwargs):
-    r = redis.StrictRedis.from_url(redis_url) if redis_url else None
-    return rate_limit(broker=r, *args, **kwargs)
