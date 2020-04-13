@@ -89,7 +89,7 @@ def rate_limit(per_second=30, resource=u'default', window_size=10,
                redis_url=None):
     arg = Argument(resource, window_size, per_second, error_message, redis_url)
 
-    def hook(req, resp, params):
+    def hook(req, resp, resource, params):
         if redis_url:
             try:
                 redis
