@@ -23,7 +23,7 @@ import redis
 
 class RedisResource(object):
     @falcon.before(
-        rate_limit(redis_url='localhost:6379', per_second=1, window_size=5,
+        rate_limit(redis_url='redis://localhost:6379/0', per_second=1, window_size=5,
                    resource='on_get'))
     def on_get(self, req, resp):
         resp.status = falcon.HTTP_200
